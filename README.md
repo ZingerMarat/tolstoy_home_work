@@ -105,7 +105,41 @@ To deploy the application to Heroku, follow these steps:
 - If you encounter any issues with the build process, make sure that the necessary build scripts are present in the `package.json` files for both the backend and frontend.
 - Ensure that your environment variables are properly configured in the Heroku environment.
 
-## License
+## Design choices and trade-offs
 
-This project is licensed under the MIT License.
+#### 1. Monorepo Structure:
+##### Design Choice:
+I structured the application as a monorepo, where both the frontend (React) and backend (Node.js/Express) reside within the same repository.
+##### Reasoning:
+This simplifies deployment and version control, as the entire project can be managed in one place. It also makes it easier to deploy the frontend and backend together on Heroku.
+##### Trade-off:
+Monorepos can grow complex as the project scales, and separating concerns between frontend and backend might become challenging for larger projects.
+#### 2. Frontend Served via Backend:
+##### Design Choice: 
+The frontend is served as static files from the backend Express server. When deploying, the frontend build files are generated and served by Express.
+##### Reasoning: 
+This approach ensures that the frontend and backend are deployed as a single application on Heroku, using one dyno. It simplifies routing and deployment.
+##### Trade-off: 
+Serving static files from the backend might not be as performant as using a dedicated CDN or static file hosting service. This could impact load times for large frontend applications.
+#### 3. Heroku Build Process:
+##### Design Choice: 
+The heroku-postbuild script installs frontend dependencies and builds the React application during deployment.
+##### Reasoning: 
+This allows Heroku to automatically build and serve the production-ready frontend files after deploying the backend.
+##### Trade-off: 
+Relying on Heroku’s build process can introduce delays during deployment, especially for large frontend builds. Additionally, any issues in the frontend build will cause the entire deployment to fail.
+#### 4. Node.js Version Specification:
+##### Design Choice: 
+I explicitly specified the Node.js version in the package.json file.
+##### Reasoning: 
+Heroku requires a Node.js version to ensure compatibility during deployment. Specifying the version also helps avoid unexpected issues related to differences in Node.js versions.
+##### Trade-off: 
+Locking in a specific version of Node.js might require additional maintenance as new versions of Node.js are released.
+#### 5. Rate Limiting and CSRF Protection:
+##### Design Choice: 
+I implemented rate limiting to prevent abuse and CSRF protection to secure form submissions.
+##### Reasoning: 
+These security measures protect the server from common attack vectors, like brute force or cross-site request forgery.
+##### Trade-off: 
+While these measures add security, they can also introduce complexity in handling real-world use cases, such as dealing with legitimate high traffic that might be falsely flagged by rate limiting.
 
